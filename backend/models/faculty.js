@@ -24,6 +24,11 @@ const FacultySchema = new mongoose.Schema({
     },
     courses: {
         type: [CourseSchema]
+    },
+    usertype: {
+        type: String,
+        default: "Faculty",
+        immutable: true
     }
 });
 

@@ -18,8 +18,9 @@ const getAllFaculty = async(req, res, next) => {
 
 const addFaculty = async (req, res, next) => {
     try {
+        
         const { name, email, courses } = req.body;
-
+        // console.log(req.user)
   // Validate input
         if (!name || !email || !courses || courses.length === 0) {
             return res.status(400).send('Missing required fields');

@@ -7,6 +7,9 @@ const PORT = process.env.PORT || 9000;
 
 const facultyRouter = require("./routes/faculty");
 const adminRouter = require("./routes/admin");
+const studentRouter = require("./routes/student")
+const apiRouter = require("./routes/api")
+const hodRouter = require("./routes/hod");
 
 const app = express();
 app.use(express.json());
@@ -36,8 +39,12 @@ const connectToDatabase = async () => {
 
 connectToDatabase();
 
+app.use("/api", apiRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/faculty", facultyRouter);
+app.use("/api/student", studentRouter)
+app.use("/api/hod", hodRouter)
+
 console.log("Current config : ", process.env.NODE_ENV);
 app.listen(PORT, () => {
     console.log(`server running on port ${PORT}`);
