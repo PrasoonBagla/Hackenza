@@ -2,6 +2,7 @@ import React, { useState,useRef } from "react";
 import styled from "styled-components";
 import Navbar from "./Navbar";
 import emailjs from 'emailjs-com';
+import { useNavigate } from "react-router-dom"; // I
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { jsPDF } from "jspdf";
@@ -139,8 +140,13 @@ const Studentdashboard = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [signed, setSigned] = useState(false); // New 
   const [selectedFile, setSelectedFile] = useState(null);
+  const navigate = useNavigate(); // Initialize 
   const fileInputRef = useRef(null);
   const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
+  const handleLogout = () => {
+    // Logout logic
+    navigate("/"); // Navigate to the "/" page
+  };
   const handleDownload = () => {
     if (!selectedCourse) return; // Check if a course is selected
 
@@ -217,7 +223,7 @@ const Studentdashboard = () => {
           <DropdownButton onClick={toggleDropdown}>Personal Data</DropdownButton>
           {dropdownOpen && (
             <DropdownContent>
-              <DropdownItem onClick={() => alert("Logging out...")}>Logout</DropdownItem>
+               <DropdownItem onClick={handleLogout}>Logout</DropdownItem>
             </DropdownContent>
           )}
         </DropdownContainer>

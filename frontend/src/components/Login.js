@@ -3,7 +3,8 @@ import styled from "styled-components";
 import { initializeApp } from 'firebase/app';
 import Navbar from "../components/Navbar";
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import GoogleButton from 'react-google-button'
+import GoogleButton from 'react-google-button';
+import googleimage from "../images/google-96.png";
 import {useNavigate} from 'react-router-dom';
 // Import Firestore if you plan to use it. Otherwise, you can remove this import.
 // import { getFirestore, collection, getDocs } from 'firebase/firestore/lite';
@@ -19,6 +20,32 @@ const firebaseConfig = {
     appId: "1:261635425914:web:55c57c2bb715700ffeddc3",
     measurementId: "G-5M1C0PC7KR"
   };
+  const LoginContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  flex-direction: column;
+`;
+
+const LoginGoogleOAuth = styled.div`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #dadce0;
+  border-radius: 0.6rem;
+  margin-bottom: 300px;
+  padding: 0.6rem;
+  cursor: pointer;
+  &:hover {
+      background-color: #ffbd4424;
+  }
+`;
+
+const GoogleImage = styled.img`
+  width: 2rem;
+  margin-right: 0.5rem;
+`;
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
@@ -65,10 +92,15 @@ const Login = () => {
     return (
         <div>
              <Navbar />
-            <h2>FDCM ALLOTMENT</h2>
-            <GoogleButton1><GoogleButton  onClick={signInWithGoogle} Sign in with Google /></GoogleButton1>
-            {/* <GoogleButton  onClick={signInWithGoogle} Sign in with Google /> */}
-        </div>
+             <LoginContainer>
+            <LoginGoogleOAuth onClick={signInWithGoogle}>
+                <GoogleImage src={googleimage} alt="Google logo" />
+                Sign in with Google
+            </LoginGoogleOAuth>
+        </LoginContainer>
+      </div>
+    // </div>
+    //     </div>
     );
 }
 

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import Navbar from "./Navbar";
 import emailjs from 'emailjs-com';
+import { useNavigate } from "react-router-dom"; // I
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 const DashboardContainer = styled.div`
@@ -130,12 +131,16 @@ const Admindashboard = () => {
     const [selectedFaculty, setSelectedFaculty] = useState(null);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
+    const navigate = useNavigate(); // Initia
     emailjs.init("opaDeYZHDncQnfSIC");
     const handleDetailClick = (faculty, event) => {
         event.stopPropagation(); // Prevents the click from bubbling to the card's onClick
         setSelectedFaculty(faculty);
     };
-
+    const handleLogout = () => {
+      // Logout logic
+      navigate("/"); // Navigate to the "/" page
+    };
     const sendEmail = (templateParams) => {
       emailjs.send('service_8k4dt4x', 'template_zk9g9k6', templateParams)
         .then((response) => {
@@ -175,7 +180,7 @@ const handleEmailAllFaculty = () => {
           <DropdownButton onClick={toggleDropdown}>Personal Data</DropdownButton>
           {dropdownOpen && (
             <DropdownContent>
-              <DropdownItem onClick={() => alert("Logging out...")}>Logout</DropdownItem>
+              <DropdownItem onClick={handleLogout}>Logout</DropdownItem>
             </DropdownContent>
           )}
         </DropdownContainer>

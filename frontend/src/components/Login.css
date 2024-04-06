@@ -1,0 +1,64 @@
+.login-container{
+    display: flex;
+    justify-content: center;
+}
+#login{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 0rem 1rem;
+    max-width: 30rem;
+    /* height: 100vh; */
+    margin-top: 20vh;
+    /* background-color: #ffbd4424; */
+    border: 1px solid #dadce0;
+    border-radius: 0.6rem;
+    overflow: hidden;
+    -webkit-box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.06);
+    -moz-box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.06);
+    box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.06);
+}
+.login-heading{
+    background-color: #ffbd4424;
+    padding-top: 1rem;
+}
+.login-heading-image{
+    width: 20rem;
+    overflow: hidden;
+    margin: auto;
+}
+.login-heading-lines{
+    margin: auto;
+}
+.login-heading-lines img{
+    width: 30rem;
+    position: relative;
+    top:3px;    
+}
+.login-google-oauth{
+    display:inline-flex;
+    align-items: center;
+    height:auto;
+    width: auto;
+    justify-content: center;
+    margin: 3rem 0rem;
+    border: 1px solid #dadce0;
+    border-radius: 0.6rem;
+    padding: 0.6rem;
+    cursor: pointer;
+}
+.login-google-oauth:hover{
+    background-color:#ffbd4424;
+}
+.login-google-oauth img{
+    width: 2rem;
+    padding-right: 0.5rem;
+}
+.login-container{
+    display: flex;
+    justify-content: center;
+    align-items: center; /* This will vertically center its children */
+    height: 100vh; /* Full viewport height */
+    flex-direction: column; /* Stack children vertically */
+}

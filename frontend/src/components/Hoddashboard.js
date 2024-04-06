@@ -4,15 +4,19 @@ import Navbar from "./Navbar";
 import emailjs from 'emailjs-com';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useNavigate } from "react-router-dom"; // I
 
 const DashboardContainer = styled.div`
   display: flex;
   height: 100vh;
 `;
 const TopBarContainer = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  padding: 20px;
+display: flex;
+justify-content: space-between; // Distribute the content to the left and right
+align-items: center; // Vertically center the content
+padding: 10px;
+padding-bottom: 2px;
+border-bottom: 2px solid #ccc;
 `;
 
 
@@ -59,6 +63,7 @@ const DropdownContainer = styled.div`
 const DropdownButton = styled.button`
   padding: 8px 16px;
   border-radius: 5px;
+  margin-right: 10px;
   cursor: pointer;
   background-color: #4f6d7a;
   color: white;
@@ -90,12 +95,25 @@ const DropdownItem = styled.div`
     background-color: #f1f1f1;
   }
 `;
+const HoddashboardHeading = styled.h2`
+  margin: 0px;
+  margin-left: 10px;
+  margin-bottom: 10px;
+`;
 const FDCMDetailCard = styled(Card)`
   justify-content: flex-start;
 `;
 
 const ActionButton = styled.button`
   margin-left: 10px;
+  padding: 8px 16px;
+  border-radius: 5px;
+  margin-right: 10px;
+  cursor: pointer;
+  background-color: #4f6d7a;
+  color: white;
+  border: none;
+  display: relative;
 `;
 
 const DetailSection = styled.div`
@@ -133,8 +151,12 @@ const Hoddashboard = () => {
   const [signed, setSigned] = useState(false); // New 
   const [selectedFile, setSelectedFile] = useState(null);
   const fileInputRef = useRef(null);
+  const navigate = useNavigate(); // Initialize 
   const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
-
+  const handleLogout = () => {
+    // Logout logic
+    navigate("/"); // Navigate to the "/" page
+  };
   const handleFDCMClick = (course) => {
     setSelectedCourse({ ...course, fdcmDetails: fdcmDetails }); // Include mock fdcmDetails here
     setShowDetails(false); // Hide details initially when a new course is selected
@@ -180,19 +202,19 @@ const Hoddashboard = () => {
     <div>
       <Navbar />
       <TopBarContainer>
+      <HoddashboardHeading style={{ marginLeft: '20px' }}>HOD Dashboard</HoddashboardHeading>
       <DropdownContainer>
         <DropdownButton onClick={toggleDropdown}>Personal Data</DropdownButton>
         {dropdownOpen && (
           <DropdownContent>
             <DropdownItem onClick={triggerFileInput}>Upload Signature</DropdownItem>
             <input type="file" ref={fileInputRef} onChange={handleFileChange} style={{ display: "none" }} />
-            <DropdownItem onClick={() => alert("Logging out...")}>Logout</DropdownItem>
+            <DropdownItem onClick={handleLogout}>Logout</DropdownItem>
           </DropdownContent>
         )}
       </DropdownContainer>
       </TopBarContainer>
       <ToastContainer />
-      <h2 style={{ marginLeft: '20px' }}>HOD Dashboard</h2>
       <DashboardContainer>
         <Panel>
           {courses.map((course) => (

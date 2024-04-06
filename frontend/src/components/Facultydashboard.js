@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import Navbar from "./Navbar";
+import { useNavigate } from "react-router-dom"; // I
 
 const DashboardContainer = styled.div`
   display: flex;
@@ -145,7 +146,12 @@ const courses = [
 const FacultyDashboard = () => {
     const [showForm, setShowForm] = useState(false);
     const [dropdownOpen, setDropdownOpen] = useState(false);
+    const navigate = useNavigate(); // Initialize 
     const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
+    const handleLogout = () => {
+      // Logout logic
+      navigate("/"); // Navigate to the "/" page
+    };
     const [selectedCourse, setSelectedCourse] = useState(null); // Track the selected course
     const handleFDCMButtonClick = (course) => {
         setShowForm(true); // Show the form
@@ -160,7 +166,7 @@ const FacultyDashboard = () => {
           <DropdownButton onClick={toggleDropdown}>Personal Data</DropdownButton>
           {dropdownOpen && (
             <DropdownContent>
-              <DropdownItem onClick={() => alert("Logging out...")}>Logout</DropdownItem>
+              <DropdownItem onClick={handleLogout}>Logout</DropdownItem>
             </DropdownContent>
           )}
         </DropdownContainer>
