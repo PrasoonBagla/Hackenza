@@ -39,7 +39,46 @@ const Card = styled.div`
     background-color: #ffcccc; /* Light red */
   }
 `;
+const DropdownContainer = styled.div`
+  position: relative;
+  align-self: flex-start;
+  margin-bottom: 20px; // Space between dropdown and the rest of the content
+`;
 
+const DropdownButton = styled.button`
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  background-color: #4f6d7a;
+  color: white;
+  border: none;
+  display: relative;
+`;
+
+const DropdownContent = styled.div`
+  display: none; // Initially we don't show the dropdown content
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+  right: 0;
+  top: 100%;
+  border-radius: 5px;
+
+  // Show the dropdown content when the parent container is hovered
+  ${DropdownContainer}:hover & {
+    display: block;
+  }
+`;
+
+const DropdownItem = styled.div`
+  padding: 12px 16px;
+  cursor: pointer;
+  &:hover {
+    background-color: #f1f1f1;
+  }
+`;
 const CardContent = styled.div`
   display: flex;
   justify-content: space-between;
@@ -74,6 +113,11 @@ const EmailAllButton = styled.button`
   cursor: pointer;
   /* Additional styling for the button */
 `;
+const TopBarContainer = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  padding: 20px;
+`;
 
 const facultyData = [
   {name: "Prasoon Bagla",email: "baglaprasoon02@gmail.com", details: ["Course 1 details", "Course 2 details"] },
@@ -84,6 +128,8 @@ const facultyData = [
 
 const Admindashboard = () => {
     const [selectedFaculty, setSelectedFaculty] = useState(null);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
     emailjs.init("opaDeYZHDncQnfSIC");
     const handleDetailClick = (faculty, event) => {
         event.stopPropagation(); // Prevents the click from bubbling to the card's onClick
@@ -124,6 +170,16 @@ const handleEmailAllFaculty = () => {
     return (
         <div>
             <Navbar />
+            <TopBarContainer>
+        <DropdownContainer>
+          <DropdownButton onClick={toggleDropdown}>Personal Data</DropdownButton>
+          {dropdownOpen && (
+            <DropdownContent>
+              <DropdownItem onClick={() => alert("Logging out...")}>Logout</DropdownItem>
+            </DropdownContent>
+          )}
+        </DropdownContainer>
+      </TopBarContainer>
             <ToastContainer />
             <h2>Admin Dashboard</h2>
             <DashboardContainer>

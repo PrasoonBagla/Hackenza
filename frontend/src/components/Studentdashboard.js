@@ -4,7 +4,7 @@ import Navbar from "./Navbar";
 import emailjs from 'emailjs-com';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
+import { jsPDF } from "jspdf";
 const DashboardContainer = styled.div`
   display: flex;
   height: 100vh;
@@ -105,6 +105,12 @@ const DetailSection = styled.div`
   margin-top: 16px;
 `;
 
+const ContentRow = styled.div`
+  display: flex;
+  justify-content: space-between; // Spread content to start and end
+  align-items: center; // Center items vertically
+  margin-bottom: 8px; // Space between rows, adjust as needed
+`;
 const fdcmDetails = {
   studentId: "123456",
   studentName: "John Doe",
@@ -116,7 +122,8 @@ const fdcmDetails = {
   Facultyname: "Vidhi Kabra",
   Grade: "A",
   Recommendation: "Very nice Student",
-  Remark: "Very Nice Student"
+  Remark: "Very Nice Student",
+  Approved: "True"
   // Add more FDCM details as needed
 };
 
@@ -126,7 +133,7 @@ const courses = [
   // Add more courses as needed
 ];
 
-const Hoddashboard = () => {
+const Studentdashboard = () => {
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -134,6 +141,28 @@ const Hoddashboard = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const fileInputRef = useRef(null);
   const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
+  const handleDownload = () => {
+    if (!selectedCourse) return; // Check if a course is selected
+
+    // Initialize jsPDF
+    const doc = new jsPDF();
+
+    // Add text to PDF
+    doc.text(`Student ID: ${fdcmDetails.studentId}`, 10, 10);
+    doc.text(`Student Name: ${fdcmDetails.studentName}`, 10, 20);
+    doc.text(`Student EmailID: ${fdcmDetails.studentEmailID}`, 10, 30);
+    doc.text(`Course Code: ${fdcmDetails.courseCode}`, 10, 40);
+    doc.text(`Course Title: ${fdcmDetails.courseTitle}`, 10, 50);
+    doc.text(`Instructor in Charge: ${fdcmDetails.instructionincharge}`, 10, 60);
+    doc.text(`Component: ${fdcmDetails.Component}`, 10, 70);
+    doc.text(`Faculty Name: ${fdcmDetails.Facultyname}`, 10, 80);
+    doc.text(`Grade: ${fdcmDetails.Grade}`, 10, 90);
+    doc.text(`Recommendation: ${fdcmDetails.Recommendation}`, 10, 100);
+    doc.text(`Remark: ${fdcmDetails.Remark}`, 10, 110);
+
+    // Save the PDF
+    doc.save('StudentDetails.pdf');
+  };
 
   const handleFDCMClick = (course) => {
     setSelectedCourse({ ...course, fdcmDetails: fdcmDetails }); // Include mock fdcmDetails here
@@ -176,69 +205,53 @@ const Hoddashboard = () => {
         alert('Failed to send email');
       });
   };
+  const handleCourseClick = (course) => {
+    setSelectedCourse(course); // Assume course includes necessary details for download
+  };
+
   return (
     <div>
       <Navbar />
       <TopBarContainer>
-      <DropdownContainer>
-        <DropdownButton onClick={toggleDropdown}>Personal Data</DropdownButton>
-        {dropdownOpen && (
-          <DropdownContent>
-            <DropdownItem onClick={triggerFileInput}>Upload Signature</DropdownItem>
-            <input type="file" ref={fileInputRef} onChange={handleFileChange} style={{ display: "none" }} />
-            <DropdownItem onClick={() => alert("Logging out...")}>Logout</DropdownItem>
-          </DropdownContent>
-        )}
-      </DropdownContainer>
+        <DropdownContainer>
+          <DropdownButton onClick={toggleDropdown}>Personal Data</DropdownButton>
+          {dropdownOpen && (
+            <DropdownContent>
+              <DropdownItem onClick={() => alert("Logging out...")}>Logout</DropdownItem>
+            </DropdownContent>
+          )}
+        </DropdownContainer>
       </TopBarContainer>
       <ToastContainer />
-      <h2 style={{ marginLeft: '20px' }}>HOD Dashboard</h2>
+      <h2 style={{ marginLeft: '20px' }}>Student Dashboard</h2>
       <DashboardContainer>
         <Panel>
+          {/* List courses in the left panel with an FDCM button for each */}
           {courses.map((course) => (
-            <Card key={course.id} onClick={() => handleFDCMClick(course)}>
-              <span>{course.name}</span>
-              <ActionButton onClick={(e) => {
-                e.stopPropagation();
-                handleFDCMClick(course);
-              }}>FDCM</ActionButton>
+            <Card key={course.id}>
+              <div>
+                <p>{course.name}</p>
+              </div>
+              <ActionButton onClick={() => handleFDCMClick(course)}>FDCM</ActionButton>
             </Card>
           ))}
         </Panel>
         <VerticalLine />
         <Panel>
+          {/* Right panel shows details of the selected course and a Download button */}
           {selectedCourse && (
-            <FDCMDetailCard>
-              <span>{selectedCourse.fdcmDetails.studentName}</span>
-              <div style={{ marginLeft: "auto" }}> {/* Align buttons to the right */}
-              <ActionButton onClick={handleViewClick}>View</ActionButton>
-              {signed ? (
-                <ActionButton disabled>Signed</ActionButton> // Display as "Signed" and disabled
-              ) : (
-                <ActionButton onClick={handleSignClick}>Sign</ActionButton> // Allow clicking to sign
-              )}
-            </div>
-            </FDCMDetailCard>
+            <DetailSection>
+                <ContentRow>
+              <h3>{selectedCourse.name}</h3>
+              {/* Display additional selected course details as needed */}
+              <ActionButton onClick={handleDownload}>Download</ActionButton>
+              </ContentRow>
+            </DetailSection>
           )}
-         {showDetails && selectedCourse && (
-          <DetailSection>
-            <p>Student ID: {selectedCourse.fdcmDetails.studentId}</p>
-            <p>Student Name: {selectedCourse.fdcmDetails.studentName}</p>
-            <p>Student EmailID: {selectedCourse.fdcmDetails.studentEmailID}</p>
-            <p>Course Code: {selectedCourse.fdcmDetails.courseCode}</p>
-            <p>Course Title: {selectedCourse.fdcmDetails.courseTitle}</p>
-            <p>Instructor in Charge: {selectedCourse.fdcmDetails.instructionincharge}</p>
-            <p>Component: {selectedCourse.fdcmDetails.Component}</p>
-            <p>Faculty Name: {selectedCourse.fdcmDetails.Facultyname}</p>
-            <p>Grade: {selectedCourse.fdcmDetails.Grade}</p>
-            <p>Recommendation: {selectedCourse.fdcmDetails.Recommendation}</p>
-            <p>Remark: {selectedCourse.fdcmDetails.Remark}</p>
-          </DetailSection>
-)}
         </Panel>
       </DashboardContainer>
     </div>
   );
 };
 
-export default Hoddashboard;
+export default Studentdashboard;

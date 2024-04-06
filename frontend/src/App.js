@@ -4,6 +4,7 @@ import Login from './components/Login';
 import Admindashboard from './components/Admindashboard';
 import Facultydashboard from './components/Facultydashboard';
 import Hoddashboard from './components/Hoddashboard';
+import Studentdashboard from './components/Studentdashboard';
 function App() {
   return (
     <Router>
@@ -12,6 +13,7 @@ function App() {
     <Route path="/admindashboard" element={<Admindashboard />}></Route>
     <Route path="/facultydashboard" element={<Facultydashboard />}></Route>
     <Route path="/hoddashboard" element={<Hoddashboard />}></Route>
+    <Route path="/studentdashboard" element={<Studentdashboard />}></Route>
     </Routes>
     </Router>
   );
