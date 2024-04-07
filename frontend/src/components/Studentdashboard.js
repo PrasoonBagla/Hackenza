@@ -1,19 +1,23 @@
-import React, { useState,useRef } from "react";
+import React, { useState,useRef,useEffect } from "react";
 import styled from "styled-components";
 import Navbar from "./Navbar";
 import emailjs from 'emailjs-com';
 import { useNavigate } from "react-router-dom"; // I
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import axios from "../service/axios";
 import { jsPDF } from "jspdf";
 const DashboardContainer = styled.div`
   display: flex;
   height: 100vh;
 `;
 const TopBarContainer = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  padding: 20px;
+display: flex;
+justify-content: space-between; // Distribute the content to the left and right
+align-items: center; // Vertically center the content
+padding: 10px;
+padding-bottom: 2px;
+border-bottom: 2px solid #ccc;
 `;
 
 
@@ -26,7 +30,7 @@ const Panel = styled.div`
 const VerticalLine = styled.div`
   width: 2px;
   background-color: #ccc;
-  height: 100%;
+  height: auto;
 `;
 
 const Card = styled.div`
@@ -60,6 +64,7 @@ const DropdownContainer = styled.div`
 const DropdownButton = styled.button`
   padding: 8px 16px;
   border-radius: 5px;
+  margin-right: 10px;
   cursor: pointer;
   background-color: #4f6d7a;
   color: white;
@@ -91,12 +96,24 @@ const DropdownItem = styled.div`
     background-color: #f1f1f1;
   }
 `;
+const HoddashboardHeading = styled.h2`
+  margin: 0px;
+  margin-left: 10px;
+  margin-bottom: 10px;
+`;
 const FDCMDetailCard = styled(Card)`
   justify-content: flex-start;
 `;
 
 const ActionButton = styled.button`
-  margin-left: 10px;
+padding: 8px 16px;
+border-radius: 5px;
+margin-right: 10px;
+cursor: pointer;
+background-color: #4f6d7a;
+color: white;
+border: none;
+display: relative;
 `;
 
 const DetailSection = styled.div`
@@ -112,21 +129,21 @@ const ContentRow = styled.div`
   align-items: center; // Center items vertically
   margin-bottom: 8px; // Space between rows, adjust as needed
 `;
-const fdcmDetails = {
-  studentId: "123456",
-  studentName: "John Doe",
-  studentEmailID: "baglaprasoon02@gmail.com",
-  courseCode: "CSC101",
-  courseTitle: "Introduction to Computer Science",
-  instructionincharge: "Prasoon Bagla",
-  Component: "Lab",
-  Facultyname: "Vidhi Kabra",
-  Grade: "A",
-  Recommendation: "Very nice Student",
-  Remark: "Very Nice Student",
-  Approved: "True"
-  // Add more FDCM details as needed
-};
+// const fdcmDetails = {
+//   studentId: "123456",
+//   studentName: "John Doe",
+//   studentEmailID: "baglaprasoon02@gmail.com",
+//   courseCode: "CSC101",
+//   courseTitle: "Introduction to Computer Science",
+//   instructionincharge: "Prasoon Bagla",
+//   Component: "Lab",
+//   Facultyname: "Vidhi Kabra",
+//   Grade: "A",
+//   Recommendation: "Very nice Student",
+//   Remark: "Very Nice Student",
+//   Approved: "True"
+//   // Add more FDCM details as needed
+// };
 
 const courses = [
   { id: 1, name: "Course 1" },
@@ -137,6 +154,7 @@ const courses = [
 const Studentdashboard = () => {
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
+  const [fdcmDetails, setfdcmDetails] = useState([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [signed, setSigned] = useState(false); // New 
   const [selectedFile, setSelectedFile] = useState(null);
@@ -147,33 +165,61 @@ const Studentdashboard = () => {
     // Logout logic
     navigate("/"); // Navigate to the "/" page
   };
+
+//   console.log(emailId);
+  useEffect(() => {
+    const emailId = localStorage.getItem("EmailID");
+    const fetchFDCMDetails = async () => {
+        try {
+            const response = await axios.post('/api/student/getDetails', {
+                email: emailId
+            });
+            console.log(response.data);
+            setfdcmDetails(response.data); // Assuming the response has the data directly
+        } catch (error) {
+            console.error("Error fetching FDCM details:", error);
+            // toast.error('Failed to fetch FDCM details.');
+        }
+      };
+    
+      fetchFDCMDetails(emailId); // This was missing
+    }, []);
   const handleDownload = () => {
     if (!selectedCourse) return; // Check if a course is selected
 
     // Initialize jsPDF
     const doc = new jsPDF();
 
-    // Add text to PDF
-    doc.text(`Student ID: ${fdcmDetails.studentId}`, 10, 10);
-    doc.text(`Student Name: ${fdcmDetails.studentName}`, 10, 20);
-    doc.text(`Student EmailID: ${fdcmDetails.studentEmailID}`, 10, 30);
-    doc.text(`Course Code: ${fdcmDetails.courseCode}`, 10, 40);
-    doc.text(`Course Title: ${fdcmDetails.courseTitle}`, 10, 50);
-    doc.text(`Instructor in Charge: ${fdcmDetails.instructionincharge}`, 10, 60);
-    doc.text(`Component: ${fdcmDetails.Component}`, 10, 70);
-    doc.text(`Faculty Name: ${fdcmDetails.Facultyname}`, 10, 80);
-    doc.text(`Grade: ${fdcmDetails.Grade}`, 10, 90);
-    doc.text(`Recommendation: ${fdcmDetails.Recommendation}`, 10, 100);
-    doc.text(`Remark: ${fdcmDetails.Remark}`, 10, 110);
-
-    // Save the PDF
-    doc.save('StudentDetails.pdf');
+    const lines = [
+        `Student ID: ${fdcmDetails.bitsID}`,
+        `Student Name: ${fdcmDetails.name}`,
+        `Student EmailID: ${fdcmDetails.email}`,
+        `Course Code: ${selectedCourse.coursecode}`, // Assuming this property exists in your course objects
+        `Course Title: ${selectedCourse.courseName}`, // Assuming courseName is the correct property
+        `Instructor in Charge: ${selectedCourse.instructorIncharge}`, // Update according to actual property names
+        `Component: ${selectedCourse.component}`, // Update according to actual property names
+        `Faculty Name: ${selectedCourse.facultyAssisted}`, // Update according to actual property names
+        `Grade: ${selectedCourse.grade}`, // Assuming this property exists
+        `Recommendation: ${selectedCourse.recommendation}`, // Assuming this property exists
+        `Remark: ${selectedCourse.remarks}`, // Assuming this property exists
+        `Approved: ${selectedCourse.approved ? "True" : "False"}`
+      ];
+  
+      // Add text lines to the PDF
+      lines.forEach((line, index) => {
+        doc.text(line, 10, 10 + (index * 10));
+      });
+  
+      // Save the PDF
+      doc.save('CourseDetails.pdf');
   };
 
-  const handleFDCMClick = (course) => {
-    setSelectedCourse({ ...course, fdcmDetails: fdcmDetails }); // Include mock fdcmDetails here
-    setShowDetails(false); // Hide details initially when a new course is selected
-  };
+  const handleFDCMClick = (course1) => {
+    console.log(course1);
+    // const course = fdcmDetails.courses;
+    setSelectedCourse(course1); // Set the entire course object including its 'approved' status
+    setShowDetails(true); // Assuming you want to show details
+};
   const handleViewClick = () => {
     setShowDetails(!showDetails); // Toggle the visibility of the details
   };
@@ -219,6 +265,7 @@ const Studentdashboard = () => {
     <div>
       <Navbar />
       <TopBarContainer>
+      <HoddashboardHeading style={{ marginLeft: '20px' }}>Student Dashboard</HoddashboardHeading>
         <DropdownContainer>
           <DropdownButton onClick={toggleDropdown}>Personal Data</DropdownButton>
           {dropdownOpen && (
@@ -229,14 +276,12 @@ const Studentdashboard = () => {
         </DropdownContainer>
       </TopBarContainer>
       <ToastContainer />
-      <h2 style={{ marginLeft: '20px' }}>Student Dashboard</h2>
       <DashboardContainer>
         <Panel>
-          {/* List courses in the left panel with an FDCM button for each */}
-          {courses.map((course) => (
-            <Card key={course.id}>
+          {fdcmDetails.courses?.map((course) => (
+            <Card >
               <div>
-                <p>{course.name}</p>
+                <p>{course.courseName}</p>
               </div>
               <ActionButton onClick={() => handleFDCMClick(course)}>FDCM</ActionButton>
             </Card>
@@ -248,10 +293,15 @@ const Studentdashboard = () => {
           {selectedCourse && (
             <DetailSection>
                 <ContentRow>
-              <h3>{selectedCourse.name}</h3>
-              {/* Display additional selected course details as needed */}
-              <ActionButton onClick={handleDownload}>Download</ActionButton>
-              </ContentRow>
+              <div>
+                <h3>{selectedCourse.courseName}</h3>
+                {/* Additional details if needed */}
+                <p>Approved: {selectedCourse.approved ? "True" : "False"}</p>
+              </div>
+              <ActionButton disabled={!selectedCourse.approved} onClick={handleDownload}>
+                Download
+              </ActionButton>
+            </ContentRow>
             </DetailSection>
           )}
         </Panel>

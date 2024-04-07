@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import styled from "styled-components";
 import Navbar from "./Navbar";
+import axios from "../service/axios";
 import { useNavigate } from "react-router-dom"; // I
 
 const DashboardContainer = styled.div`
@@ -38,9 +39,14 @@ const Card = styled.div`
 `;
 
 const FDCMButton = styled.button`
-  padding: 8px 16px;
-  border-radius: 5px;
-  cursor: pointer;
+padding: 8px 16px;
+border-radius: 5px;
+margin-right: 10px;
+cursor: pointer;
+background-color: #4f6d7a;
+color: white;
+border: none;
+display: relative;
 `;
 
 const Form = styled.form`
@@ -60,13 +66,15 @@ const VerticalLine = styled.div`
   background-color: #ccc;
 `;
 
-const SubmitButton = styled.button`
-  padding: 10px 15px;
-  border-radius: 5px;
-  cursor: pointer;
-  background-color: blue;
-  color: white;
-  border: none;
+const SubmitButton = styled.button.attrs(() => ({ type: 'submit' }))`
+padding: 8px 16px;
+border-radius: 5px;
+margin-right: 10px;
+cursor: pointer;
+background-color: #4f6d7a;
+color: white;
+border: none;
+display: relative;
 `;
 const DropdownContainer = styled.div`
   position: relative;
@@ -75,13 +83,14 @@ const DropdownContainer = styled.div`
 `;
 
 const DropdownButton = styled.button`
-  padding: 8px 16px;
-  border-radius: 5px;
-  cursor: pointer;
-  background-color: #4f6d7a;
-  color: white;
-  border: none;
-  display: relative;
+padding: 8px 16px;
+border-radius: 5px;
+margin-right: 10px;
+cursor: pointer;
+background-color: #4f6d7a;
+color: white;
+border: none;
+display: relative;
 `;
 
 const DropdownContent = styled.div`
@@ -121,16 +130,29 @@ const HalfWidthInput = styled(Input)`
 const FullWidthInput = styled(Input)`
   width: 100%;
 `;
-
+const HoddashboardHeading = styled.h2`
+  margin: 0px;
+  margin-left: 10px;
+  margin-bottom: 10px;
+`;
 const FullWidthTextArea = styled(Input).attrs({ as: 'textarea' })`
   width: 100%;
   height: 100px; /* Adjust height as needed */
 `;
 const TopBarContainer = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  padding: 20px;
+display: flex;
+justify-content: space-between; // Distribute the content to the left and right
+align-items: center; // Vertically center the content
+padding: 10px;
+padding-bottom: 2px;
+border-bottom: 2px solid #ccc;
 `;
+const CoursesHeading = styled.h2`
+  margin: 0px;
+  margin-bottom:10px;
+
+  padding: 0px;
+`
 const FormTitle = styled.h3`
   font-size: 24px; /* Adjust size as needed */
   margin-bottom: 20px; /* Provide space between title and first form row */
@@ -147,6 +169,19 @@ const FacultyDashboard = () => {
     const [showForm, setShowForm] = useState(false);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const navigate = useNavigate(); // Initialize 
+    const [bitsId, setBitsid] = useState("");
+    const [studentName, setName] = useState("");
+    const [coursecode, setCourseCode] = useState("");
+    const [emailid, setEmail] = useState("");
+    const [courseTitle, setCourseTitle] = useState("");
+    const [icCourse, setIcCourse] = useState("");
+    const [component, setComponent] = useState("");
+    const [facultyass, setFacultyass] = useState("");
+    const [grade, setGrade] = useState("");
+    const [recommendation, setRecommendation] = useState("");
+    const [remark, setRemark] = useState("");
+
+    const [courses, setCourses] = useState([]);
     const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
     const handleLogout = () => {
       // Logout logic
@@ -157,11 +192,52 @@ const FacultyDashboard = () => {
         setShowForm(true); // Show the form
         setSelectedCourse(course); // Update the selected course
     };
+  useEffect(() => {
+    const emailId = localStorage.getItem("EmailID");
+    const fetchCourseData = async () => {
+        try {
+            const response = await axios.post('/api/faculty/getCourses', {
+                email: emailId
+            });
+            console.log(response.data);
+            setCourses(response.data); // Assuming the response has the data directly
+        } catch (error) {
+            console.error("Error fetching FDCM details:", error);
+            // toast.error('Failed to fetch FDCM details.');
+        }
+      };
+      fetchCourseData(emailId); // This was missing
+    }, []);
 
+    const HandleSubmit = async(event) => {
+      try{
+         event.preventDefault();
+        const data = await axios.post('/api/faculty/createOrUpdateFDCM', {
+          bitsID: bitsId,
+          name: studentName,
+          email: emailid,
+          course : {
+            courseName: courseTitle,
+            coursecode: coursecode,
+            facultyAssisted: facultyass,
+            instructorIncharge: icCourse,
+            component: component,
+            grade: grade,
+            recommendation: recommendation,
+            remarks: remark
+          }
+        });
+        console.log(data.data);
+      }
+      catch(error){
+        console.log(error);
+      }
+    }
     return (
         <div>
             <Navbar />
             <TopBarContainer>
+            <HoddashboardHeading style={{ marginLeft: '20px' }}>Faculty Dashboard</HoddashboardHeading>
         <DropdownContainer>
           <DropdownButton onClick={toggleDropdown}>Personal Data</DropdownButton>
           {dropdownOpen && (
@@ -173,8 +249,7 @@ const FacultyDashboard = () => {
       </TopBarContainer>
             <DashboardContainer>
                 <LeftPanel>
-                <h2>Faculty Dashboard</h2>
-                    <h2>Courses</h2>
+                    <CoursesHeading>Courses</CoursesHeading>
                     {courses.map((course) => (
                         <Card key={course.id}>
                             <span>{course.name}</span>
@@ -189,28 +264,29 @@ const FacultyDashboard = () => {
                   <FormTitle>Enter data for FDCM course</FormTitle>
                   <Form>
                       <FormRow>
-                          <HalfWidthInput placeholder="Student ID NO." />
-                          <HalfWidthInput placeholder="Student Name" />
+                          <HalfWidthInput onChange={e => setBitsid(e.target.value)} placeholder="Student ID NO." />
+                          <HalfWidthInput onChange={e => setName(e.target.value)}placeholder="Student Name" />
                       </FormRow>
                       <FormRow>
-                          <HalfWidthInput placeholder="Course Code" />
-                          <HalfWidthInput placeholder="Course Title" />
+                          <HalfWidthInput onChange={e => setCourseCode(e.target.value)}placeholder="Course Code" />
+                          <HalfWidthInput onChange={e => setCourseTitle(e.target.value)}placeholder="Course Title" />
                       </FormRow>
                       <FormRow>
-                          <HalfWidthInput placeholder="Instructor in Charge (IC)" />
-                          <HalfWidthInput placeholder="Component (Tutorial/Lab)" />
+                          <HalfWidthInput onChange={e => setIcCourse(e.target.value)} placeholder="Email of Instructor in Charge (IC)" />
+                          <HalfWidthInput onChange={e => setComponent(e.target.value)}placeholder="Component (Tutorial/Lab)" />
                       </FormRow>
                       <FormRow>
-                          <HalfWidthInput placeholder="Name of Faculty Assisted" />
-                          <HalfWidthInput placeholder="Grade" />
+                          <HalfWidthInput onChange={e => setFacultyass(e.target.value)}placeholder="Email of Faculty Assisted" />
+                          <HalfWidthInput onChange={e => setGrade(e.target.value)}placeholder="Grade" />
                       </FormRow>
                       <FormRow>
-                          <FullWidthInput placeholder="Recommendation" />
+                          <FullWidthInput onChange={e => setRecommendation(e.target.value)}placeholder="Recommendation" />
+                          <FullWidthInput onChange={e => setEmail(e.target.value)}placeholder="Students Email ID" />
                       </FormRow>
                       <FormRow>
-                          <FullWidthTextArea placeholder="Remark" />
+                          <FullWidthTextArea onChange={e => setRemark(e.target.value)}placeholder="Remark" />
                       </FormRow>
-                      <SubmitButton type="submit">Submit</SubmitButton>
+                      <SubmitButton onClick={(e)=>HandleSubmit(e)}>Submit</SubmitButton>
                   </Form>
               </RightPanel>
                 )}

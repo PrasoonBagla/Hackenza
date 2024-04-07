@@ -1,15 +1,15 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import styled from "styled-components";
 import Navbar from "./Navbar";
 import emailjs from 'emailjs-com';
 import { useNavigate } from "react-router-dom"; // I
+import axios from "../service/axios";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 const DashboardContainer = styled.div`
   display: flex;
-  height: 100vh;
+  width: 100%;
 `;
-
 const LeftPanel = styled.div`
   width: 50%;
   padding: 20px;
@@ -47,13 +47,14 @@ const DropdownContainer = styled.div`
 `;
 
 const DropdownButton = styled.button`
-  padding: 8px 16px;
-  border-radius: 5px;
-  cursor: pointer;
-  background-color: #4f6d7a;
-  color: white;
-  border: none;
-  display: relative;
+padding: 8px 16px;
+border-radius: 5px;
+margin-right: 10px;
+cursor: pointer;
+background-color: #4f6d7a;
+color: white;
+border: none;
+display: relative;
 `;
 
 const DropdownContent = styled.div`
@@ -72,7 +73,11 @@ const DropdownContent = styled.div`
     display: block;
   }
 `;
-
+const HoddashboardHeading = styled.h2`
+  margin: 0px;
+  margin-left: 10px;
+  margin-bottom: 10px;
+`;
 const DropdownItem = styled.div`
   padding: 12px 16px;
   cursor: pointer;
@@ -87,7 +92,14 @@ const CardContent = styled.div`
 `;
 
 const DetailButton = styled.button`
-  /* Style your button as needed */
+padding: 8px 16px;
+border-radius: 5px;
+margin-right: 10px;
+cursor: pointer;
+background-color: #4f6d7a;
+color: white;
+border: none;
+display: relative;
 `;
 
 const DetailSection = styled.div`
@@ -105,31 +117,35 @@ const PanelHeading = styled.h2`
 `;
 
 const EmailAllButton = styled.button`
-  position: relative; /* Positions the button at the bottom */
-  // bottom: 20px; /* Distance from the bottom of LeftPanel */
-  left: 50%;
-  transform: translateX(-50%); /* Centers the button horizontally */
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  /* Additional styling for the button */
+padding: 8px 16px;
+border-radius: 5px;
+margin-right: 10px;
+cursor: pointer;
+background-color: #4f6d7a;
+color: white;
+border: none;
+display: relative;
 `;
 const TopBarContainer = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  padding: 20px;
+display: flex;
+justify-content: space-between; // Distribute the content to the left and right
+align-items: center; // Vertically center the content
+padding: 10px;
+padding-bottom: 2px;
+border-bottom: 2px solid #ccc;
 `;
 
-const facultyData = [
-  {name: "Prasoon Bagla",email: "baglaprasoon02@gmail.com", details: ["Course 1 details", "Course 2 details"] },
-  {name: "Prasoon Bagla",email: "baglaprasoon02@gmail.com", details: ["Course 1 details", "Course 2 details"] },
+// const facultyData = [
+//   {name: "Prasoon Bagla",email: "baglaprasoon02@gmail.com", details: ["Course 1 details", "Course 2 details"] },
+//   {name: "Prasoon Bagla",email: "baglaprasoon02@gmail.com", details: ["Course 1 details", "Course 2 details"] },
   
-  // ... more faculties
-];
+//   // ... more faculties
+// ];
 
 const Admindashboard = () => {
     const [selectedFaculty, setSelectedFaculty] = useState(null);
     const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [facultyData, setFacultyData] = useState([]);
     const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
     const navigate = useNavigate(); // Initia
     emailjs.init("opaDeYZHDncQnfSIC");
@@ -137,6 +153,20 @@ const Admindashboard = () => {
         event.stopPropagation(); // Prevents the click from bubbling to the card's onClick
         setSelectedFaculty(faculty);
     };
+
+    useEffect(() => {
+      const fetchFacultyData = async () => {
+          try {
+              const response = await axios.post('/api/admin/getFaculty');
+              console.log(response.data);
+              setFacultyData(response.data); // Assuming the response has the data directly
+          } catch (error) {
+              console.error("Error fetching faculty data:", error);
+              toast.error('Failed to fetch faculty data.');
+          }
+      };
+      fetchFacultyData();
+  }, []);
     const handleLogout = () => {
       // Logout logic
       navigate("/"); // Navigate to the "/" page
@@ -176,6 +206,7 @@ const handleEmailAllFaculty = () => {
         <div>
             <Navbar />
             <TopBarContainer>
+            <HoddashboardHeading style={{ marginLeft: '20px' }}>Admin Dashboard</HoddashboardHeading>
         <DropdownContainer>
           <DropdownButton onClick={toggleDropdown}>Personal Data</DropdownButton>
           {dropdownOpen && (
@@ -186,29 +217,33 @@ const handleEmailAllFaculty = () => {
         </DropdownContainer>
       </TopBarContainer>
             <ToastContainer />
-            <h2>Admin Dashboard</h2>
             <DashboardContainer>
-                <LeftPanel>
-                    {facultyData.map((faculty, index) => (
-                        <Card key={index} onClick={() => setSelectedFaculty(faculty)}>
-                            <CardContent>
-                                <h3>{faculty.name}</h3>
-                                <DetailButton onClick={(event) => handleDetailClick(faculty, event)}>Other Details</DetailButton>
-                            </CardContent>
-                        </Card>
-                    ))}
-                    <EmailAllButton onClick={handleEmailAllFaculty}>Email All Faculty</EmailAllButton>
-                </LeftPanel>
+            <LeftPanel>
+                {facultyData.map((faculty, index) => (
+                    <Card key={faculty._id || index}>
+                        <CardContent>
+                            <h3>{faculty.name}</h3>
+                            {/* Assuming you want to show a button to view details for each faculty */}
+                            <DetailButton onClick={() => setSelectedFaculty(faculty)}>View Courses</DetailButton>
+                        </CardContent>
+                    </Card>
+                ))}
+                <EmailAllButton onClick={handleEmailAllFaculty}>Email All Faculty</EmailAllButton>
+            </LeftPanel>
                 <VerticalLine />
                 <RightPanel>
-                    <PanelHeading>List of Courses</PanelHeading>
-                    {selectedFaculty && selectedFaculty.details.map((detail, index) => (
-                        <DetailSection key={index}>
-                            <p>{detail}</p>
-                            <DetailButton onClick={() => handleSendMail(selectedFaculty.details, selectedFaculty.email)}>Send Mail</DetailButton>
-                        </DetailSection>
-                    ))}
-                </RightPanel>
+                <PanelHeading>List of Courses</PanelHeading>
+                {/* Check if selectedFaculty is not null and has courses */}
+                {selectedFaculty && selectedFaculty.courses && selectedFaculty.courses.map((course, index) => (
+                    <DetailSection key={course._id || index}>
+                        <div>
+                            <p>Course Name: {course.name}</p>
+                            <p>Course Code: {course.courseCode}</p>
+                        </div>
+                        <DetailButton onClick={() => handleSendMail(course.name, selectedFaculty.email)}>Send Mail</DetailButton>
+                    </DetailSection>
+                ))}
+            </RightPanel>
             </DashboardContainer>
         </div>
     );

@@ -3,6 +3,7 @@ const Faculty = require("../models/faculty")
 
 const addFDCM = async (req, res, next) => {
     try {
+        console.log(req.body);
         const { bitsID, name, email, course } = req.body;
 
         if(!bitsID || !name || !email || !course) {
@@ -63,7 +64,26 @@ const getFDCMsForCourse = async (req, res, next) => {
     }
 }
 
+const getCourseForFaculty = async (req, res, next) => {
+    try {
+        if(!req.body.email){
+            return res.status(400).send("Email is missing!");
+        }
+ 
+        const faculty = await Faculty.findOne({email: req.body.email});
+        if(!faculty){
+            return res.status(404).send("No faculty found");
+        }
+ 
+        return res.status(200).send(faculty.courses);
+    } catch(err){
+        console.error('Error processing request', err);
+        res.status(500).send(err);
+    }
+}
+
 module.exports = {
     addFDCM,
+    getCourseForFaculty,
     getFDCMsForCourse
 }

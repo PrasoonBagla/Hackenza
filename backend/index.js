@@ -17,13 +17,7 @@ app.use(express.urlencoded({
     extended: true
 }));
 
-app.use(
-    cors({
-        origin: process.env.ORIGIN,
-        methods: "GET,HEAD,PUT,POST,PATCH,DELETE",
-        credentials: true,
-    })
-);
+app.use(cors());
 const MONGO_URI = process.env.MONGO_URI;
 
 

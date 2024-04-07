@@ -5,6 +5,7 @@ import Navbar from "../components/Navbar";
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import GoogleButton from 'react-google-button';
 import googleimage from "../images/google-96.png";
+import axios from "../service/axios";
 import {useNavigate} from 'react-router-dom';
 // Import Firestore if you plan to use it. Otherwise, you can remove this import.
 // import { getFirestore, collection, getDocs } from 'firebase/firestore/lite';
@@ -59,35 +60,39 @@ const GoogleButton1 = styled.div`
 const Login = () => {
     const navigate = useNavigate();
     // Function to handle the sign in
-    const signInWithGoogle = () => {
-        signInWithPopup(auth, provider)
-            .then((result) => {
-                // This gives you a Google Access Token. You can use it to access Google APIs.
-                const credential = GoogleAuthProvider.credentialFromResult(result);
+    const signInWithGoogle = async (event) => {
+        try {
+            const result = await signInWithPopup(auth, provider);
+            const credential = GoogleAuthProvider.credentialFromResult(result);
             const token = credential.accessToken;
-            // The signed-in user info.
             const user = result.user;
-
-            // Accessing the email of the signed-in user
-            const email = user.email;
+    
             console.log(token);
-            if(email != null)
+            
+            // Assuming "/api/getUser" expects an object with the user's email
+            // and that you've set up axios to point to your backend correctly
+            const email = user.email;
+            const data = await axios.post("/api/getUser", { email: email });
+            localStorage.setItem("EmailID",data.data.email);
+            console.log(data.data.usertype); // Assuming you want to log the response data
+            if(data.data.usertype === "Faculty")
             {
-                // navigate("/admindashboard");
-                // navigate("/facultydashboard");
-                navigate("/hoddashboard");
+                navigate("/facultydashboard");
+            }
+            else if(data.data.usertype === "Hod"){
+                navigate("/hoddashboard");  
+            }
+            else if(data.data.usertype === "Admin"){
+                navigate("/admindashboard");  
+            }
+            else if(data.data.usertype === "Student"){
+                navigate("/studentdashboard");  
             }
             console.log("Signed in user email:", email);
-            }).catch((error) => {
-                // Handle Errors here.
-                const errorCode = error.code;
-                const errorMessage = error.message;
-                // The email of the user's account used.
-                const email = error.email;
-                // The AuthCredential type that was used.
-                const credential = GoogleAuthProvider.credentialFromError(error);
-                console.error(errorCode, errorMessage);
-            });
+        } catch (error) {
+            console.error("Error during sign in:", error.message);
+            // Handle the error as needed
+        }
     };
     return (
         <div>

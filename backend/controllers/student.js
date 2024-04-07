@@ -2,11 +2,12 @@ const Student = require("../models/student")
 
 const getStudentDetails = async (req, res, next) => {
     try {
-        if(!req.body.bitsID){
-            return res.status(400).send("Course Code is missing!");
+        console.log(req.body)
+        if(!req.body.email){
+            return res.status(400).send("email is missing!");
         }
 
-        const student = await Student.findOne({"bitsID": req.body.bitsID});
+        const student = await Student.findOne({"email": req.body.email});
         if(!student){
             return res.status(404).send("No such student exists");
         }

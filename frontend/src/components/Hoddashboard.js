@@ -1,7 +1,8 @@
-import React, { useState,useRef } from "react";
+import React, { useState,useRef,useEffect } from "react";
 import styled from "styled-components";
 import Navbar from "./Navbar";
 import emailjs from 'emailjs-com';
+import axios from '../service/axios';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from "react-router-dom"; // I
@@ -18,8 +19,6 @@ padding: 10px;
 padding-bottom: 2px;
 border-bottom: 2px solid #ccc;
 `;
-
-
 const Panel = styled.div`
   width: 50%;
   padding: 20px;
@@ -29,7 +28,7 @@ const Panel = styled.div`
 const VerticalLine = styled.div`
   width: 2px;
   background-color: #ccc;
-  height: 100%;
+  height: 90%;
 `;
 
 const Card = styled.div`
@@ -138,15 +137,17 @@ const fdcmDetails = {
   // Add more FDCM details as needed
 };
 
-const courses = [
-  { id: 1, name: "Course 1" },
-  { id: 2, name: "Course 2" },
-  // Add more courses as needed
-];
-
+// const courses = [
+//   { id: 1, name: "Course 1" },
+//   { id: 2, name: "Course 2" },
+//   // Add more courses as needed
+// ];
 const Hoddashboard = () => {
   const [selectedCourse, setSelectedCourse] = useState(null);
+  const [selectedStudentName, setSelectedStudentName] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
+  const [courses,setCourses] = useState([]);
+  const [fdcmdetails,setFDCMdetails] = useState([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [signed, setSigned] = useState(false); // New 
   const [selectedFile, setSelectedFile] = useState(null);
@@ -157,17 +158,38 @@ const Hoddashboard = () => {
     // Logout logic
     navigate("/"); // Navigate to the "/" page
   };
-  const handleFDCMClick = (course) => {
-    setSelectedCourse({ ...course, fdcmDetails: fdcmDetails }); // Include mock fdcmDetails here
-    setShowDetails(false); // Hide details initially when a new course is selected
+  const handleFDCMClick = async (course) => {
+    try {
+      // Assuming you need to send the course ID or some identifier to get the FDCM details
+      const response = await axios.post('/api/hod/getFDCMDetails', { coursecode: course}); // Adjust the payload as needed based on your backend API
+
+      // Assuming the response contains the FDCM details directly
+      const fdcmDetails = response.data;
+      console.log(response.data);
+      setSelectedCourse(fdcmDetails); // Set the selected course with its FDCM details
+      // console.log(selectedCourse);
+      setShowDetails(false); // Optionally hide details initially when a new course is selected
+      setSigned(false); // Reset the signed state in case it was set for a previous course
+  } catch (error) {
+      console.error("Error fetching FDCM details:", error);
+      // Optionally show an error message to the user, e.g., using react-toastify
+      // toast.error('Failed to fetch FDCM details.');
+  }
   };
-  const handleViewClick = () => {
+  const handleViewClick = (name) => {
     setShowDetails(!showDetails); // Toggle the visibility of the details
+    if (selectedStudentName === name) {
+      // If the same student's details are already being shown, hide them.
+      setSelectedStudentName(null);
+    } else {
+      // Show the clicked student's details.
+      setSelectedStudentName(name);
+    }
   };
-  const handleSignClick = () => {
+  const handleSignClick = (selectedCourse) => {
     setSigned(true); // Update the signed status to true
     alert("Signed"); // Optionally alert the user
-    sendEmail();
+    sendEmail(selectedCourse);
   };
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -181,11 +203,25 @@ const Hoddashboard = () => {
   const triggerFileInput = () => {
     fileInputRef.current.click();
   };
-  const sendEmail = () => {
+  useEffect(() => {
+    const emailId = localStorage.getItem("EmailID");
+    const fetchCoursesDetails = async () => {
+        try {
+            const response = await axios.post('/api/hod/getCourses');
+            console.log(response.data);
+            setCourses(response.data); // Assuming the response has the data directly
+        } catch (error) {
+            console.error("Error fetching FDCM details:", error);
+            // toast.error('Failed to fetch FDCM details.');
+        }
+      };
+      fetchCoursesDetails(emailId); // This was missing
+    }, []);
+  const sendEmail = (selectedCourse) => {
     const templateParams = {
-      studentName: selectedCourse.fdcmDetails.studentName,
-      studentEmailID: selectedCourse.fdcmDetails.studentEmailID,
-      courseTitle: selectedCourse.fdcmDetails.courseTitle,
+      studentName: selectedCourse.name,
+      studentEmailID: selectedCourse.email,
+      courseTitle: selectedCourse.courses?.courseName,
       // Add other parameters you want to use in your email template
     };
     emailjs.send('service_8k4dt4x', 'template_vjqd4bg', templateParams, 'opaDeYZHDncQnfSIC')
@@ -218,7 +254,7 @@ const Hoddashboard = () => {
       <DashboardContainer>
         <Panel>
           {courses.map((course) => (
-            <Card key={course.id} onClick={() => handleFDCMClick(course)}>
+            <Card  onClick={() => handleFDCMClick(course.courseCode)}>
               <span>{course.name}</span>
               <ActionButton onClick={(e) => {
                 e.stopPropagation();
@@ -229,34 +265,41 @@ const Hoddashboard = () => {
         </Panel>
         <VerticalLine />
         <Panel>
-          {selectedCourse && (
-            <FDCMDetailCard>
-              <span>{selectedCourse.fdcmDetails.studentName}</span>
-              <div style={{ marginLeft: "auto" }}> {/* Align buttons to the right */}
-              <ActionButton onClick={handleViewClick}>View</ActionButton>
-              {signed ? (
-                <ActionButton disabled>Signed</ActionButton> // Display as "Signed" and disabled
-              ) : (
-                <ActionButton onClick={handleSignClick}>Sign</ActionButton> // Allow clicking to sign
-              )}
-            </div>
-            </FDCMDetailCard>
-          )}
-         {showDetails && selectedCourse && (
-          <DetailSection>
-            <p>Student ID: {selectedCourse.fdcmDetails.studentId}</p>
-            <p>Student Name: {selectedCourse.fdcmDetails.studentName}</p>
-            <p>Student EmailID: {selectedCourse.fdcmDetails.studentEmailID}</p>
-            <p>Course Code: {selectedCourse.fdcmDetails.courseCode}</p>
-            <p>Course Title: {selectedCourse.fdcmDetails.courseTitle}</p>
-            <p>Instructor in Charge: {selectedCourse.fdcmDetails.instructionincharge}</p>
-            <p>Component: {selectedCourse.fdcmDetails.Component}</p>
-            <p>Faculty Name: {selectedCourse.fdcmDetails.Facultyname}</p>
-            <p>Grade: {selectedCourse.fdcmDetails.Grade}</p>
-            <p>Recommendation: {selectedCourse.fdcmDetails.Recommendation}</p>
-            <p>Remark: {selectedCourse.fdcmDetails.Remark}</p>
-          </DetailSection>
-)}
+        {selectedCourse && selectedCourse.map((course, index) => (
+  <FDCMDetailCard key={index}> {/* Adding a key for React to track each element uniquely */}
+    <span>{course.name}</span>
+    <div style={{ marginLeft: "auto" }}> {/* Align buttons to the right */}
+      <ActionButton onClick={() => handleViewClick(course.name)}>View</ActionButton>
+      {signed ? (
+        <ActionButton disabled>Signed</ActionButton> // Display as "Signed" and disabled
+      ) : (
+        <ActionButton onClick={() => handleSignClick(selectedCourse)}>Sign</ActionButton> // Allow clicking to sign
+      )}
+    </div>
+  </FDCMDetailCard>
+))}
+        {selectedCourse && selectedCourse
+  .filter(student => student.name === selectedStudentName)
+  .map((student, studentIndex) => (
+    <DetailSection key={studentIndex}>
+      <p>Student ID: {student.bitsID}</p>
+      <p>Student Name: {student.name}</p>
+      <p>Student EmailID: {student.email}</p>
+      {student.courses.map((course, courseIndex) => (
+        <div key={courseIndex}>
+          <p>Course Code: {course.coursecode}</p>
+          <p>Course Title: {course.courseName}</p>
+          <p>Instructor in Charge: {course.instructorIncharge}</p>
+          <p>Component: {course.component}</p>
+          <p>Faculty Name: {course.facultyAssisted}</p>
+          <p>Grade: {course.grade}</p>
+          <p>Recommendation: {course.recommendation}</p>
+          <p>Remark: {course.remarks}</p>
+        </div>
+      ))}
+    </DetailSection>
+  ))
+}
         </Panel>
       </DashboardContainer>
     </div>
