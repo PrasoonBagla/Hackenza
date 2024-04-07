@@ -224,7 +224,7 @@ const Hoddashboard = () => {
       courseTitle: selectedCourse.courses?.courseName,
       // Add other parameters you want to use in your email template
     };
-    emailjs.send('service_8k4dt4x', 'template_vjqd4bg', templateParams, 'opaDeYZHDncQnfSIC')
+    emailjs.send(process.env.id1, process.env.templateid2, templateParams, process.env.appid)
       .then((response) => {
         console.log('SUCCESS!', response.status, response.text);
         alert('Email sent successfully');

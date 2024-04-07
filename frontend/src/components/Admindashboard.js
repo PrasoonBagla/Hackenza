@@ -148,7 +148,7 @@ const Admindashboard = () => {
     const [facultyData, setFacultyData] = useState([]);
     const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
     const navigate = useNavigate(); // Initia
-    emailjs.init("opaDeYZHDncQnfSIC");
+    emailjs.init(process.env.emailjsinit);
     const handleDetailClick = (faculty, event) => {
         event.stopPropagation(); // Prevents the click from bubbling to the card's onClick
         setSelectedFaculty(faculty);
@@ -172,7 +172,7 @@ const Admindashboard = () => {
       navigate("/"); // Navigate to the "/" page
     };
     const sendEmail = (templateParams) => {
-      emailjs.send('service_8k4dt4x', 'template_zk9g9k6', templateParams)
+      emailjs.send(process.env.id, process.env.templatedid, templateParams)
         .then((response) => {
            console.log('SUCCESS!', response.status, response.text);
            toast.success('Email sent successfully!');

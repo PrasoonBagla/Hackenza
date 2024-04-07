@@ -8,6 +8,7 @@
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.6.8",
     "bootstrap": "^5.3.3",
+    "dotenv": "^16.4.5",
     "emailjs-com": "^3.2.0",
     "firebase": "^10.10.0",
     "jspdf": "^2.5.1",
