@@ -51,7 +51,14 @@ After receiving the email from the Head of Department (HOD), students have the a
 https://drive.google.com/file/d/1xE6xex5K8CFJhZiAHc3aFS6ni0RnoFOc/view?usp=sharing
 
 
+**6. MongoDB database structure
 
+There are 5 collection in out database: Admins, Courses, Faculties, Hod and Students.
+The documents in Admin collection has fields: Email and Usertype. 
+Each course document has Name and Course Code fields.
+Each faculty document has Name, Email, Usertype and an array of courses. Each course is a object with fields name and course code.
+Hod has one document which contains Name, Email and Usertype.
+Each document in Student collection has fields: BITS ID, Name, Email, Usertype and array of courses. Each course has Course Name, Course Code, Faculty Assisted, Instructor Incharge, Component, Grade, Recommendation, Remarks and Approved fields.
 
 ## Run Locally
 
